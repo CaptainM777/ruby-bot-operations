@@ -26,7 +26,7 @@ module BotOperations
 
   def self.process_exists(event)
     command_output = Open3.capture2("pm2 jlist")[0]
-    process_name = JSON.parse(comamnd_output).map{ |process| process["name"] }.find{ |process_name| event.bot.name.downcase == process_name.downcase }
+    process_name = JSON.parse(command_output).map{ |process| process["name"] }.find{ |process_name| event.bot.name.downcase == process_name.downcase }
 
     if process_name.nil?
       event.send_embed do |embed| 
