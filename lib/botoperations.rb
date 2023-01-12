@@ -25,17 +25,17 @@ module BotOperations
   end
 
   def self.process_exists(event)
-    process_name = JSON.parse(`pm2 jlist`).map{ |process| process["name"] }.find{ |process_name| event.bot.name.downcase == process_name.downcase }
+    command_output = Open3.capture("pm2 jlist")[0]
+    process_name = JSON.parse(comamnd_output).map{ |process| process["name"] }.find{ |process_name| event.bot.name.downcase == process_name.downcase }
 
     if process_name.nil?
       event.send_embed do |embed| 
         embed.description = "❌ A managing pm2 process could not be found!"
         embed.color = "#e12a2a"
       end
-      return false 
     end
 
-    true
+    process_name
   end
 
   command :restart, aliases: [:r] do |event|
@@ -75,9 +75,9 @@ module BotOperations
       break
     end
     
-    break if !bot_name_exists(event) || !process_exists(event)
+    break if !bot_name_exists(event) || !(process_name = process_exists(event))
 
-    output = `tail -n #{lines} ~/.pm2/logs/#{log_type == "out" ? "zym-out.log" : "zym-error.log"}`.gsub(/\t/, "")
+    output = `tail -n #{lines} ~/.pm2/logs/#{log_type == "out" ? "#{process_name}-out.log" : "#{process_name}-error.log"}`.gsub(/\t/, "")
 
     begin
       event.send_embed do |embed|
