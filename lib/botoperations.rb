@@ -2,6 +2,7 @@
 
 require_relative "botoperations/version"
 require "json"
+require "open3"
 
 module BotOperations
   extend Discordrb::Commands::CommandContainer
