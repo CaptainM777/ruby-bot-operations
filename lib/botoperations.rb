@@ -78,12 +78,13 @@ module BotOperations
     
     break if !bot_name_exists(event) || !(process_name = process_exists(event))
 
-    output = `tail -n #{lines} ~/.pm2/logs/#{log_type == "out" ? "#{process_name}-out.log" : "#{process_name}-error.log"}`.gsub(/\t/, "")
+    command_output = Open3.capture3("pm2 logs #{process_name} --raw --nostream --lines #{lines}")
+    log_file_contents = log_type == "out" ? command_output[0] : command_output[1]
 
     begin
       event.send_embed do |embed|
         embed.color = 0xFFD700
-        embed.description = "```#{output}```"
+        embed.description = "```#{log_file_contents}```"
       end
     rescue Discordrb::Errors::InvalidFormBody
       event.send_embed{ |embed| embed.description = "❌ Embed is too large! Try providing a smaller number of lines."; embed.color = "#e12a2a" }
